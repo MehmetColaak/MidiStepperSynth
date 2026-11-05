@@ -19,6 +19,7 @@ void setup() {
 
 void loop() {
   synth.read(Serial);   // raw MIDI bytes over serial
+  // synth.readUsbMidi(); // ESP32-S2/S3: USB-MIDI device
 }
 ```
 
@@ -41,16 +42,32 @@ between the board and the drivers. Power the driver logic (VDD) from the
 board's 3.3 V or 5 V to match its I/O level, and the motor (VMOT) from a
 separate supply.
 
-## MIDI
+## MIDI input
 
-- Note On / Note Off, last-note priority per channel
-- Pitch Bend (±2 semitones, `setBendRange()`)
-- CC 120 / 123 (all sound / notes off)
+| Input | Boards | How |
+|---|---|---|
+| Serial (raw MIDI bytes) | all | `synth.read(Serial)` in `loop()` |
+| USB-MIDI device | ESP32-S2, ESP32-S3 | `synth.readUsbMidi()` in `loop()`; set *USB Mode: USB-OTG (TinyUSB)* |
 
-Feed it raw MIDI with `read(Stream&)` / `handleMidiByte()`, or call
-`noteOn()`, `noteOff()`, `pitchBend()` yourself, e.g. from the
+With USB-MIDI the board appears on the computer as a MIDI device, so a DAW
+or Max can play it directly. See `examples/UsbMidi`.
+
+You can also call `noteOn()`, `noteOff()`, `pitchBend()` yourself, e.g. from
 [Arduino MIDI Library](https://github.com/FortySevenEffects/arduino_midi_library)
-callbacks.
+callbacks. Channels are 1–16.
+
+Supported: Note On / Off, Pitch Bend (±2 semitones, `setBendRange()`),
+CC 120 / 123 (all sound / notes off).
+
+## Note mapping
+
+- **Channel per motor** (default): motor 1 plays channel 1, motor 2 channel 2…
+  one note at a time, the newest wins.
+- **Polyphonic**: `synth.setPolyphonic(true)` — notes from any channel go to
+  the motor idle the longest. When all motors are busy, the oldest note is cut
+  off. Play chords from a single keyboard or a single-track MIDI file.
+- **Note range**: `synth.setNoteRange(36, 84)` — notes outside the range are
+  moved by octaves into it, so motors never get pitches they can't play.
 
 ## License
 

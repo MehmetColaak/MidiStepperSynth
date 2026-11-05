@@ -1,7 +1,8 @@
 # MidiStepperSynth
 
-Play MIDI on stepper motors. Each motor plays one MIDI channel; the pitch is
-the frequency of its STEP pulses. Works with any STEP/DIR driver
+Play MIDI on stepper motors. Each motor plays one MIDI channel, or notes are
+spread across motors in polyphonic mode; the pitch is the frequency of its
+STEP pulses. Works with any STEP/DIR driver
 (A4988, DRV8825, TMC2208, ...).
 
 ```cpp
@@ -31,9 +32,10 @@ void loop() {
 | ESP32-S3 | 10 | LEDC + MCPWM hardware PWM |
 | ESP32-S2 | 4 | LEDC hardware PWM |
 | ESP32-C3 / C6 / H2 | 3 | LEDC hardware PWM |
-| AVR, SAMD, Teensy, others | planned | timer interrupt |
+| AVR, SAMD, Teensy, others | not supported yet | — |
 
-Arduino-ESP32 core 2.x and 3.x are both supported.
+Tested with Arduino-ESP32 core 2.x. Core 3.x has code paths but is not
+compile-tested yet.
 
 ## Wiring
 
@@ -50,7 +52,9 @@ separate supply.
 | USB-MIDI device | ESP32-S2, ESP32-S3 | `synth.readUsbMidi()` in `loop()`; set *USB Mode: USB-OTG (TinyUSB)* |
 
 With USB-MIDI the board appears on the computer as a MIDI device, so a DAW
-or Max can play it directly. See `examples/UsbMidi`.
+or Max can play it directly. See `examples/UsbMidi`. In USB-OTG mode the
+automatic upload reset may not work: hold BOOT, press RST, release BOOT,
+then upload.
 
 You can also call `noteOn()`, `noteOff()`, `pitchBend()` yourself, e.g. from
 [Arduino MIDI Library](https://github.com/FortySevenEffects/arduino_midi_library)
